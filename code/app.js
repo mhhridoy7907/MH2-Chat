@@ -11,15 +11,22 @@ import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+
+
+
+// Firebase Configuration
+// Sensitive values have been partially hidden for security reasons.
+// Replace with your own Firebase project credentials.
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAMS45LQi5K-k_Yz0PUqb-noOqbOzj2a1w",
-  authDomain: "mh22-chat.firebaseapp.com",
-  databaseURL: "https://mh22-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "mh22-chat",
-  storageBucket: "mh22-chat.firebasestorage.app",
-  messagingSenderId: "863567518346",
-  appId: "1:863567518346:web:bd36ee7da24514ecb1ab73",
-  measurementId: "G-H04G5RHFTG"
+  apiKey: "AIz*******************1w",
+  authDomain: "mh************com",
+  databaseURL: "https://mh2*********************se.app",
+  projectId: "**********",
+  storageBucket: "m************e.app",
+  messagingSenderId: "8***********346",
+  appId: "1:863***************b1ab73",
+  measurementId: "G-H************TG"
 };
 
 const fbApp = initializeApp(firebaseConfig);
