@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MH2 Chat</title>
+ <link rel="icon" type="image/x-icon" href="https://github.com/mhhridoy7907/MH2-Chat/blob/main/mh2%20chat%20icon.png?raw=true">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0B65D7;--primary-dark:#0950b0;--primary-light:#3b82f6;
+  --secondary:#38C7C0;--secondary-dark:#2aa09a;
+  --gradient:linear-gradient(135deg,#0B65D7 0%,#38C7C0 100%);
+  --gradient-soft:linear-gradient(135deg,rgba(11,101,215,0.10) 0%,rgba(56,199,192,0.10) 100%);
+  --white:#fff;--bg:#F0F4FC;--bg2:#E4ECF7;--sidebar:#fff;--chat-bg:#F0F4FC;
+  --panel:#fff;--border:#DDE5F5;--text:#0F172A;--text2:#475569;--text-muted:#94A3B8;
+  --bubble-me:linear-gradient(135deg,#0B65D7,#1e7de0);
+  --bubble-them:#fff;--bubble-them-border:#DDE5F5;
+  --input-bg:#EDF2FA;--hover:#EDF2FA;--header:#fff;
+  --shadow:0 1px 4px rgba(11,101,215,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 20px rgba(11,101,215,0.13);--shadow-lg:0 12px 48px rgba(11,101,215,0.18);
+  --radius:16px;--radius-sm:10px;--transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+  --online:#10B981;--danger:#EF4444;--star:#F59E0B;--pin:#8B5CF6;
+}
+.dark-mode{
+  --bg:#0D1117;--bg2:#161B22;--sidebar:#161B22;--chat-bg:#0D1117;--panel:#1C2333;
+  --border:#2D3748;--text:#E2E8F0;--text2:#94A3B8;--text-muted:#64748B;
+  --bubble-them:#1C2333;--bubble-them-border:#2D3748;--input-bg:#1C2333;
+  --hover:#1C2333;--header:#161B22;
+  --shadow:0 1px 4px rgba(0,0,0,0.3);--shadow-md:0 4px 20px rgba(0,0,0,0.4);--shadow-lg:0 12px 48px rgba(0,0,0,0.5);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:99999;background:var(--gradient);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none;}
+.splash-logo{width:96px;height:96px;border-radius:28px;background:rgba(255,255,255,0.2);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);animation:splashPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;}
+@keyframes splashPop{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.splash-title{font-size:38px;font-weight:900;color:#fff;letter-spacing:-0.5px;animation:splashFadeUp 0.5s ease 0.5s both;}
+.splash-sub{font-size:14px;color:rgba(255,255,255,0.75);animation:splashFadeUp 0.5s ease 0.65s both;}
+@keyframes splashFadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.splash-loader{display:flex;gap:8px;animation:splashFadeUp 0.5s ease 0.8s both;}
+.splash-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);animation:splashDot 1.2s ease infinite;}
+.splash-dot:nth-child(2){animation-delay:0.15s;}.splash-dot:nth-child(3){animation-delay:0.3s;}
+@keyframes splashDot{0%,80%,100%{transform:scale(0.6);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+
+/* AUTH */
+#auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B65D7 0%,#0d4fa8 50%,#38C7C0 100%);display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
+#auth-overlay.show{display:flex;}
+#auth-overlay::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
+.auth-card{background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border-radius:24px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);position:relative;z-index:1;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.auth-header{background:var(--gradient);padding:40px 32px 36px;text-align:center;position:relative;overflow:hidden;}
+.auth-header::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.auth-header::after{content:'';position:absolute;bottom:-40px;left:-40px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.auth-logo{width:72px;height:72px;border-radius:22px;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 24px rgba(0,0,0,0.2);position:relative;z-index:1;}
+.auth-logo svg{width:44px;height:44px;}
+.auth-header h1{font-size:28px;font-weight:900;color:#fff;position:relative;z-index:1;letter-spacing:-0.5px;}
+.auth-header p{font-size:13px;color:rgba(255,255,255,0.78);margin-top:5px;position:relative;z-index:1;}
+.auth-body{padding:32px 28px 36px;}
+.auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:28px;}
+.auth-tab{flex:1;padding:10px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-muted);transition:var(--transition);font-family:inherit;}
+.auth-tab.active{background:var(--white);color:var(--primary);box-shadow:var(--shadow);}
+.auth-step{display:none;animation:fadeInUp 0.25s ease;}.auth-step.active{display:block;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;letter-spacing:0.5px;text-transform:uppercase;}
+.field input{width:100%;background:var(--input-bg);border:2px solid transparent;border-radius:12px;padding:13px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:var(--transition);}
+.field input:focus{border-color:var(--primary);background:var(--white);box-shadow:0 0 0 4px rgba(11,101,215,0.08);}
+.field input::placeholder{color:var(--text-muted);}
+.input-icon-wrap{position:relative;}
+.input-icon-wrap input{padding-right:44px;}
+.input-icon-wrap .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center;}
+.input-icon-wrap .eye-btn svg{width:18px;height:18px;}
+.btn-primary{width:100%;padding:14px;border-radius:13px;border:none;background:var(--gradient);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(11,101,215,0.35);transition:var(--transition);position:relative;overflow:hidden;font-family:inherit;letter-spacing:0.2px;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(11,101,215,0.45);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.btn-primary .btn-loader{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+.btn-primary.loading .btn-loader{display:block;}
+.btn-primary.loading .btn-label{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.auth-err{color:var(--danger);font-size:13px;text-align:center;min-height:20px;margin-bottom:12px;padding:0 4px;animation:shake 0.3s ease;font-weight:500;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+.auth-success{color:#10B981;font-size:13px;text-align:center;min-height:20px;margin-bottom:12px;font-weight:500;}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:12px;font-weight:500;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-switch{text-align:center;font-size:13px;color:var(--text-muted);margin-top:16px;}
+.auth-switch span{color:var(--primary);font-weight:700;cursor:pointer;}
+.auth-switch span:hover{text-decoration:underline;}
+.strength-bar{height:4px;border-radius:4px;margin-top:8px;background:var(--border);overflow:hidden;display:none;}
+.strength-bar-fill{height:100%;border-radius:4px;transition:width 0.3s,background 0.3s;}
+.strength-label{font-size:11px;margin-top:4px;font-weight:500;display:none;}
+
+/* MAIN APP */
+#app{display:none;height:100vh;overflow:hidden;}
+#app.show{display:flex;}
+
+/* SIDEBAR */
+#sidebar{width:360px;min-width:280px;display:flex;flex-direction:column;background:var(--sidebar);border-right:1px solid var(--border);flex-shrink:0;position:relative;transition:transform 0.3s ease;}
+.sidebar-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--header);border-bottom:1px solid var(--border);height:64px;flex-shrink:0;}
+.my-avatar-wrap{position:relative;cursor:pointer;}
+.my-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0;overflow:hidden;background:var(--gradient);transition:var(--transition);box-shadow:0 2px 8px rgba(11,101,215,0.2);}
+.my-avatar:hover{transform:scale(1.07);}
+.my-avatar img{width:100%;height:100%;object-fit:cover;}
+.sidebar-title{flex:1;font-size:19px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.4px;}
+.hdr-actions{display:flex;gap:4px;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.icon-btn:hover{background:var(--hover);color:var(--primary);}
+.icon-btn svg{width:18px;height:18px;}
+.icon-btn.active{background:var(--gradient-soft);color:var(--primary);}
+.search-wrap{padding:10px 14px;background:var(--sidebar);border-bottom:1px solid var(--border);flex-shrink:0;}
+.search-inner{display:flex;align-items:center;gap:8px;background:var(--input-bg);border-radius:12px;padding:9px 13px;border:2px solid transparent;transition:var(--transition);}
+.search-inner:focus-within{border-color:var(--primary);background:var(--white);}
+.search-inner svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0;}
+.search-inner input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--text);font-family:inherit;}
+.search-inner input::placeholder{color:var(--text-muted);}
+#contacts-list{flex:1;overflow-y:auto;}
+#contacts-list::-webkit-scrollbar{width:4px;}
+#contacts-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.contacts-section-label{padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.contact-item{display:flex;align-items:center;gap:13px;padding:11px 16px;cursor:pointer;border-bottom:1px solid rgba(226,232,244,0.5);transition:var(--transition);position:relative;border-left:3px solid transparent;}
+.contact-item:hover{background:var(--hover);}
+.contact-item.active{background:var(--gradient-soft);border-left-color:var(--primary);}
+.c-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;position:relative;overflow:hidden;background:var(--gradient);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.c-avatar img{width:100%;height:100%;object-fit:cover;}
+.online-dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;background:var(--online);border-radius:50%;border:2px solid var(--sidebar);box-shadow:0 0 0 1px rgba(16,185,129,0.3);}
+.c-info{flex:1;min-width:0;}
+.c-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+.c-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.c-time{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
+.c-bottom{display:flex;align-items:center;gap:6px;margin-top:3px;}
+.c-last{font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.unread-badge{background:var(--gradient);color:#fff;border-radius:10px;min-width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0;box-shadow:0 2px 6px rgba(11,101,215,0.3);}
+.empty-state{padding:56px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.empty-state-icon{width:64px;height:64px;border-radius:20px;background:var(--gradient-soft);display:flex;align-items:center;justify-content:center;}
+.empty-state-icon svg{width:32px;height:32px;color:var(--primary);}
+.empty-state p{font-size:14px;color:var(--text-muted);line-height:1.5;}
+
+/* CHAT AREA */
+#chat-area{flex:1;display:flex;flex-direction:column;background:var(--chat-bg);min-width:0;position:relative;}
+#chat-area::before{content:'';position:absolute;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230B65D7' fill-opacity='1'%3E%3Cpath d='M20 20.5V18H0v5h5v5H0v5h20v-9.5zm-2 4.5h2v4h-4v-4h2v-4h2v4zm10-4a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+#chat-welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;position:relative;z-index:1;padding:32px;}
+.welcome-icon{width:100px;height:100px;border-radius:30px;background:var(--gradient);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.welcome-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.4px;}
+.welcome-sub{font-size:14px;color:var(--text-muted);text-align:center;max-width:300px;line-height:1.7;}
+.welcome-badge{display:flex;align-items:center;gap:8px;background:var(--gradient-soft);border-radius:20px;padding:9px 18px;font-size:13px;color:var(--primary);font-weight:600;border:1px solid rgba(11,101,215,0.15);}
+#chat-header{display:none;align-items:center;gap:12px;padding:10px 16px;background:var(--header);border-bottom:1px solid var(--border);height:64px;flex-shrink:0;position:relative;z-index:2;box-shadow:var(--shadow);}
+.chat-hdr-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0;cursor:pointer;overflow:hidden;background:var(--gradient);transition:var(--transition);box-shadow:0 2px 8px rgba(11,101,215,0.2);}
+.chat-hdr-av:hover{transform:scale(1.07);}
+.chat-hdr-av img{width:100%;height:100%;object-fit:cover;}
+.chat-hdr-info{flex:1;min-width:0;}
+.chat-hdr-name{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-hdr-status{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.chat-hdr-status.online{color:var(--online);font-weight:600;}
+#chat-search-bar{display:none;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);position:relative;z-index:2;animation:slideDown 0.2s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+#chat-search-bar.show{display:block;}
+.chat-search-inner{display:flex;align-items:center;gap:8px;background:var(--input-bg);border-radius:12px;padding:9px 13px;}
+.chat-search-inner input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--text);font-family:inherit;}
+#search-result-info{font-size:12px;color:var(--text-muted);margin-top:6px;text-align:center;}
+#messages-box{flex:1;overflow-y:auto;padding:16px 8%;display:none;position:relative;z-index:1;scroll-behavior:smooth;}
+#messages-box::-webkit-scrollbar{width:4px;}
+#messages-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.date-divider{text-align:center;margin:18px 0;}
+.date-divider span{background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);color:var(--text2);font-size:12px;font-weight:600;padding:5px 14px;border-radius:10px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.dark-mode .date-divider span{background:rgba(28,35,51,0.88);}
+.msg-wrap{display:flex;flex-direction:column;margin:4px 0;}
+.msg-wrap.me{align-items:flex-end;}.msg-wrap.them{align-items:flex-start;}
+.msg-bubble{max-width:64%;padding:10px 13px 24px;border-radius:18px;position:relative;word-break:break-word;font-size:14px;line-height:1.55;cursor:pointer;}
+.msg-bubble:hover{filter:brightness(0.97);}
+.msg-wrap.me .msg-bubble{background:var(--bubble-me);color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 10px rgba(11,101,215,0.28);}
+.msg-wrap.them .msg-bubble{background:var(--bubble-them);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--bubble-them-border);box-shadow:var(--shadow);}
+.msg-wrap.me .msg-bubble a{color:rgba(255,255,255,0.9);}.msg-wrap.them .msg-bubble a{color:var(--primary);}
+.msg-image{max-width:220px;border-radius:12px;display:block;margin-bottom:4px;cursor:pointer;transition:var(--transition);}
+.msg-image:hover{transform:scale(1.02);}
+.file-pill{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,0.1);border-radius:12px;padding:11px 13px;cursor:pointer;transition:var(--transition);}
+.file-pill:hover{background:rgba(0,0,0,0.16);}
+.file-icon{font-size:26px;flex-shrink:0;}
+.file-meta .file-name{font-size:13px;font-weight:700;}.file-meta .file-size{font-size:11px;opacity:0.7;margin-top:2px;}
+.msg-wrap.them .file-pill{background:rgba(11,101,215,0.07);}
+.reply-quote{background:rgba(0,0,0,0.12);border-left:3px solid rgba(255,255,255,0.7);border-radius:8px;padding:7px 11px;margin-bottom:7px;font-size:12px;opacity:0.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.msg-wrap.them .reply-quote{background:rgba(11,101,215,0.08);border-left-color:var(--primary);}
+.forward-tag{font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:5px;display:flex;align-items:center;gap:4px;font-weight:500;}
+.msg-wrap.them .forward-tag{color:var(--text-muted);}
+.edited-tag{font-size:11px;opacity:0.55;margin-left:4px;}
+.msg-meta{position:absolute;bottom:5px;right:10px;display:flex;align-items:center;gap:3px;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;}
+.msg-wrap.them .msg-meta{color:var(--text-muted);}
+.tick svg{width:16px;height:10px;}
+.msg-reactions{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.reaction-pill{background:var(--panel);border:1.5px solid var(--border);border-radius:12px;padding:4px 9px;font-size:13px;cursor:pointer;transition:var(--transition);box-shadow:var(--shadow);display:flex;align-items:center;gap:4px;}
+.reaction-pill:hover{border-color:var(--primary);transform:scale(1.1);}
+.reaction-pill .r-count{font-size:11px;font-weight:700;color:var(--text2);}
+.typing-bubble{display:flex;align-items:center;gap:5px;padding:13px 16px;border-radius:18px;border-bottom-left-radius:4px;background:var(--bubble-them);border:1px solid var(--bubble-them-border);width:fit-content;margin:4px 0;box-shadow:var(--shadow);}
+.t-dot{width:7px;height:7px;background:var(--text-muted);border-radius:50%;animation:typDot 1.2s ease infinite;}
+.t-dot:nth-child(2){animation-delay:0.2s;}.t-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes typDot{0%,60%,100%{transform:translateY(0);opacity:0.4;}30%{transform:translateY(-6px);opacity:1;}}
+#input-area{display:none;flex-direction:column;padding:10px 14px;background:var(--header);border-top:1px solid var(--border);position:relative;z-index:2;flex-shrink:0;}
+#input-area.show{display:flex;}
+.reply-preview-bar{display:flex;align-items:center;gap:10px;background:var(--gradient-soft);border-left:3px solid var(--primary);border-radius:10px;padding:9px 13px;margin-bottom:9px;animation:slideDown 0.2s ease;}
+.reply-preview-bar .rp-text{flex:1;font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.reply-preview-bar .rp-close{cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;border:none;background:transparent;}
+.reply-preview-bar .rp-close:hover{color:var(--danger);}
+.input-row{display:flex;align-items:flex-end;gap:9px;}
+.emoji-wrap{position:relative;}
+.emoji-popup{display:none;position:absolute;bottom:calc(100% + 10px);left:0;background:var(--panel);border-radius:18px;padding:14px;border:1px solid var(--border);z-index:100;box-shadow:var(--shadow-lg);grid-template-columns:repeat(8,36px);gap:4px;}
+.emoji-popup.open{display:grid;}
+.ep-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;font-size:20px;transition:var(--transition);border:none;background:transparent;}
+.ep-btn:hover{background:var(--hover);transform:scale(1.15);}
+#msg-input{flex:1;background:var(--input-bg);border:2px solid transparent;outline:none;border-radius:14px;padding:11px 14px;color:var(--text);font-size:14px;font-family:inherit;resize:none;max-height:120px;line-height:1.5;transition:var(--transition);}
+#msg-input:focus{border-color:var(--primary);background:var(--white);}
+.dark-mode #msg-input:focus{background:var(--input-bg);}
+.attach-btn,.send-btn{width:46px;height:46px;border-radius:13px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition);}
+.attach-btn{background:var(--input-bg);color:var(--text2);}
+.attach-btn:hover{background:var(--hover);color:var(--primary);}
+.attach-btn svg{width:20px;height:20px;}
+.send-btn{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(11,101,215,0.35);}
+.send-btn:hover{transform:scale(1.06);box-shadow:0 6px 20px rgba(11,101,215,0.45);}
+.send-btn svg{width:20px;height:20px;fill:#fff;}
+#file-input,#img-input{display:none;}
+.attach-menu{display:none;position:absolute;bottom:calc(100% + 10px);left:52px;background:var(--panel);border-radius:18px;padding:8px;border:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:100;animation:popIn 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.attach-menu.open{display:block;}
+@keyframes popIn{from{transform:scale(0.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.am-item{display:flex;align-items:center;gap:11px;padding:11px 15px;border-radius:11px;cursor:pointer;font-size:14px;color:var(--text);transition:var(--transition);white-space:nowrap;font-weight:500;}
+.am-item:hover{background:var(--hover);color:var(--primary);}
+.am-item svg{width:18px;height:18px;flex-shrink:0;}
+.ctx-menu{position:fixed;background:var(--panel);border-radius:16px;box-shadow:var(--shadow-lg);z-index:9990;min-width:210px;overflow:hidden;border:1px solid var(--border);display:none;animation:popIn 0.15s cubic-bezier(0.34,1.56,0.64,1);}
+.ctx-menu.open{display:block;}
+.ctx-item{padding:12px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:11px;color:var(--text);transition:var(--transition);font-weight:500;}
+.ctx-item:hover{background:var(--hover);color:var(--primary);}
+.ctx-item.danger{color:var(--danger);}
+.ctx-item.danger:hover{background:rgba(239,68,68,0.06);color:var(--danger);}
+.ctx-divider{border-top:1px solid var(--border);margin:4px 0;}
+.reaction-picker{display:none;position:fixed;background:var(--panel);border-radius:40px;padding:10px 14px;border:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:9995;flex-direction:row;gap:6px;animation:popIn 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.reaction-picker.open{display:flex;}
+.rp-emoji{font-size:22px;cursor:pointer;transition:var(--transition);padding:4px;border:none;background:transparent;}
+.rp-emoji:hover{transform:scale(1.3);}
+#media-viewer{display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;}
+#media-viewer.show{display:flex;}
+#media-viewer img{max-width:92vw;max-height:90vh;border-radius:10px;object-fit:contain;box-shadow:0 0 80px rgba(0,0,0,0.6);}
+.mv-close{position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:none;color:#fff;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.mv-close:hover{background:rgba(255,255,255,0.25);}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border-radius:16px;padding:13px 22px;font-size:14px;z-index:99997;border:1px solid var(--border);box-shadow:var(--shadow-lg);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:340px;font-weight:500;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#toast .t-icon{font-size:18px;flex-shrink:0;}
+#toast .t-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.page-overlay{display:none;position:fixed;inset:0;z-index:9980;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;animation:fadeIn 0.2s ease;}
+.page-overlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.page-card{background:var(--panel);border-radius:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.page-card::-webkit-scrollbar{width:4px;}
+.page-card::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.page-hdr{display:flex;align-items:center;gap:12px;padding:22px 22px 18px;border-bottom:1px solid var(--border);}
+.page-hdr h2{flex:1;font-size:18px;font-weight:800;}
+.page-hdr .close-btn{width:36px;height:36px;border-radius:10px;border:none;background:var(--hover);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:var(--transition);}
+.page-hdr .close-btn:hover{background:var(--danger);color:#fff;}
+.page-body{padding:22px;}
+.profile-pic-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:28px;}
+.profile-pic{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#fff;background:var(--gradient);cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow-md);transition:var(--transition);}
+.profile-pic:hover{transform:scale(1.04);}
+.profile-pic img{width:100%;height:100%;object-fit:cover;}
+.profile-pic .pic-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;font-size:24px;color:#fff;}
+.profile-pic:hover .pic-overlay{display:flex;}
+.setting-group{margin-bottom:22px;}
+.setting-group-label{font-size:11px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;padding:0 4px;}
+.setting-item{display:flex;align-items:center;gap:13px;padding:14px 15px;border-radius:14px;background:var(--bg);margin-bottom:5px;cursor:pointer;transition:var(--transition);border:1.5px solid transparent;}
+.setting-item:hover{background:var(--gradient-soft);border-color:rgba(11,101,215,0.12);}
+.si-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--gradient-soft);}
+.si-body{flex:1;min-width:0;}
+.si-label{font-size:14px;font-weight:600;}
+.si-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.si-right{color:var(--text-muted);font-size:14px;}
+.toggle-switch{width:46px;height:26px;border-radius:13px;background:var(--border);border:none;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+.toggle-switch.on{background:var(--gradient);}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:var(--transition);box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.toggle-switch.on::after{left:23px;}
+.danger-zone{background:rgba(239,68,68,0.05);border-radius:14px;padding:4px;border:1px solid rgba(239,68,68,0.12);margin-top:8px;}
+.danger-zone .setting-item{background:transparent;border:none;}
+.danger-zone .setting-item:hover{background:rgba(239,68,68,0.06);}
+.danger-zone .si-label{color:var(--danger);}
+.danger-zone .si-icon{background:rgba(239,68,68,0.1);}
+#pinned-banner{display:none;align-items:center;gap:12px;padding:9px 16px;background:var(--panel);border-bottom:1px solid var(--border);cursor:pointer;transition:var(--transition);position:relative;z-index:2;}
+#pinned-banner:hover{background:var(--hover);}
+#pinned-banner.show{display:flex;}
+.pin-line{width:3px;height:38px;border-radius:2px;background:var(--gradient);flex-shrink:0;}
+.pin-content{flex:1;min-width:0;}
+.pin-label{font-size:11px;color:var(--pin);font-weight:700;}
+.pin-text{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#starred-panel{display:none;position:absolute;right:0;top:64px;bottom:0;width:310px;background:var(--panel);border-left:1px solid var(--border);z-index:5;flex-direction:column;box-shadow:var(--shadow-lg);animation:slideInRight 0.25s ease;}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+#starred-panel.show{display:flex;}
+.starred-hdr{display:flex;align-items:center;gap:10px;padding:16px 17px;border-bottom:1px solid var(--border);}
+.starred-hdr h3{flex:1;font-size:15px;font-weight:800;}
+.starred-list{flex:1;overflow-y:auto;padding:10px;}
+#confirm-dialog{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;}
+#confirm-dialog.show{display:flex;}
+.confirm-card{background:var(--panel);border-radius:22px;padding:30px;width:100%;max-width:360px;text-align:center;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.confirm-card h3{font-size:18px;font-weight:800;margin-bottom:10px;}
+.confirm-card p{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-btns .btn-cancel{flex:1;padding:12px;border-radius:11px;border:2px solid var(--border);background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);font-family:inherit;}
+.confirm-btns .btn-cancel:hover{border-color:var(--text-muted);}
+.confirm-btns .btn-confirm{flex:1;padding:12px;border-radius:11px;border:none;background:var(--danger);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);font-family:inherit;}
+.confirm-btns .btn-confirm:hover{filter:brightness(1.1);}
+#forward-modal{display:none;position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;}
+#forward-modal.show{display:flex;}
+.fw-card{background:var(--panel);border-radius:22px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);border:1px solid var(--border);overflow:hidden;animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.fw-hdr{padding:20px 22px;border-bottom:1px solid var(--border);}
+.fw-hdr h3{font-size:16px;font-weight:800;}
+.fw-list{max-height:320px;overflow-y:auto;}
+.fw-item{display:flex;align-items:center;gap:13px;padding:13px 22px;cursor:pointer;transition:var(--transition);}
+.fw-item:hover{background:var(--hover);}
+.fw-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;background:var(--gradient);flex-shrink:0;overflow:hidden;}
+.fw-av img{width:100%;height:100%;object-fit:cover;}
+.fw-name{font-size:14px;font-weight:600;}
+.fw-footer{padding:14px 22px;border-top:1px solid var(--border);}
+#chat-profile-overlay .profile-pic{pointer-events:none;cursor:default;}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  #sidebar{width:100%;position:absolute;z-index:50;height:100%;top:0;left:0;transition:transform 0.3s ease;}
+  #sidebar.mobile-hidden{transform:translateX(-100%);}
+  #chat-area{width:100%;}
+  #messages-box{padding:12px 3%;}
+  .msg-bubble{max-width:86%;}
+  .back-btn{display:flex!important;}
+  #starred-panel{width:100%;}
+}
+.back-btn{display:none;margin-right:4px;}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 40V16a4 4 0 0 1 4-4h32a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H16l-8 6v-4z" fill="white" opacity="0.95"/>
+      <text x="28" y="29" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#0B65D7">M2</text>
+    </svg>
+  </div>
+  <div class="splash-title">MH2 Chat</div>
+  <div class="splash-sub">Connect. Share. Belong.</div>
+  <div class="splash-loader">
+    <div class="splash-dot"></div><div class="splash-dot"></div><div class="splash-dot"></div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <svg viewBox="0 0 44 44" fill="none">
+          <path d="M4 32V12a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H11l-7 5v-3z" fill="white" opacity="0.95"/>
+          <text x="22" y="24" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="11" font-weight="900" fill="#0B65D7">M2</text>
+        </svg>
+      </div>
+      <h1>MH2 Chat</h1>
+      <p>Connect with your world</p>
+    </div>
+    <div class="auth-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-step active" id="step-login">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="input-icon-wrap">
+            <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+            <button class="eye-btn" onclick="togglePass('login-pass',this)" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="auth-err" id="login-err"></div>
+        <button class="btn-primary" id="login-btn" onclick="doLogin()">
+          <span class="btn-label">Sign In</span>
+          <div class="btn-loader"></div>
+        </button>
+        <div style="text-align:center;margin-top:12px;">
+          <span style="font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;" onclick="showForgotPass()">Forgot password?</span>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div class="auth-step" id="step-forgot">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:40px;margin-bottom:8px;">🔐</div>
+          <div style="font-size:14px;color:var(--text2);line-height:1.6;">Enter your email address and we'll send a password reset link.</div>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="forgot-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doForgotPass()"/>
+        </div>
+        <div class="auth-err" id="forgot-err"></div>
+        <div class="auth-success" id="forgot-success"></div>
+        <button class="btn-primary" id="forgot-btn" onclick="doForgotPass()">
+          <span class="btn-label">Send Reset Link</span>
+          <div class="btn-loader"></div>
+        </button>
+        <button style="width:100%;padding:12px;border-radius:13px;border:2px solid var(--border);background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'" onclick="showStep('step-login')">← Back to Sign In</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-step" id="step-register">
+        <div class="field">
+          <label>Display Name</label>
+          <input type="text" id="reg-name" placeholder="Your full name" maxlength="30" onkeydown="if(event.key==='Enter')document.getElementById('reg-phone').focus()"/>
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="reg-phone" placeholder="+880 1XXXXXXXXX" maxlength="20" onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()"/>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')document.getElementById('reg-pass').focus()"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="input-icon-wrap">
+            <input type="password" id="reg-pass" placeholder="Min. 6 characters" autocomplete="new-password" oninput="checkPassStrength(this.value)" onkeydown="if(event.key==='Enter')document.getElementById('reg-pass2').focus()"/>
+            <button class="eye-btn" onclick="togglePass('reg-pass',this)" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="strength-bar" id="strength-bar"><div class="strength-bar-fill" id="strength-fill"></div></div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <div class="input-icon-wrap">
+            <input type="password" id="reg-pass2" placeholder="Re-enter password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/>
+            <button class="eye-btn" onclick="togglePass('reg-pass2',this)" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="auth-err" id="reg-err"></div>
+        <button class="btn-primary" id="reg-btn" onclick="doRegister()">
+          <span class="btn-label">Create Account</span>
+          <div class="btn-loader"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <div class="my-avatar-wrap" onclick="openProfile()">
+        <div class="my-avatar" id="my-avatar"></div>
+      </div>
+      <div class="sidebar-title">MH2 Chat</div>
+      <div class="hdr-actions">
+        <button class="icon-btn" onclick="openSettings()" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="showToast('Search or select a user to chat','💬')" title="New Chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Search chats or users…" oninput="filterContacts(this.value)" id="sidebar-search"/>
+      </div>
+    </div>
+    <div id="contacts-list"></div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div id="chat-area">
+    <div id="chat-welcome">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 56 56" fill="none"><path d="M8 40V16a4 4 0 0 1 4-4h32a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H16l-8 7v-3z" fill="white" opacity="0.9"/><path d="M18 24h20M18 30h14" stroke="#0B65D7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="welcome-title">MH2 Chat</div>
+      <div class="welcome-sub">Select a conversation to start messaging securely with friends and family.</div>
+      <div class="welcome-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        End-to-end encrypted
+      </div>
+    </div>
+
+    <div id="chat-header">
+      <button class="icon-btn back-btn" onclick="closeMobileChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="chat-hdr-av" id="chat-hdr-av" onclick="openChatProfile()"></div>
+      <div class="chat-hdr-info" onclick="openChatProfile()" style="cursor:pointer">
+        <div class="chat-hdr-name" id="chat-hdr-name"></div>
+        <div class="chat-hdr-status" id="chat-hdr-status"></div>
+      </div>
+      <div class="hdr-actions">
+        <button class="icon-btn" id="star-btn" onclick="toggleStarredPanel()" title="Starred">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        </button>
+        <button class="icon-btn" onclick="toggleChatSearch()" title="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="icon-btn" onclick="openChatMenu(event)" title="More">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="pinned-banner" onclick="scrollToPinned()">
+      <div class="pin-line"></div>
+      <div class="pin-content">
+        <div class="pin-label">📌 Pinned Message</div>
+        <div class="pin-text" id="pinned-text"></div>
+      </div>
+      <button style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:18px;padding:4px;" onclick="event.stopPropagation();unpinAll()">✕</button>
+    </div>
+
+    <div id="chat-search-bar">
+      <div class="chat-search-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--text-muted);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Search in this chat…" oninput="searchMessages(this.value)" id="chat-search-input"/>
+        <button style="border:none;background:none;cursor:pointer;color:var(--text-muted);" onclick="toggleChatSearch()">✕</button>
+      </div>
+      <div id="search-result-info"></div>
+    </div>
+
+    <div id="messages-box"></div>
+
+    <div id="starred-panel">
+      <div class="starred-hdr">
+        <span style="font-size:20px;">⭐</span>
+        <h3>Starred Messages</h3>
+        <button class="icon-btn" onclick="toggleStarredPanel()">✕</button>
+      </div>
+      <div class="starred-list" id="starred-list"></div>
+    </div>
+
+    <div id="input-area">
+      <div id="reply-preview-container"></div>
+      <div class="input-row">
+        <div class="emoji-wrap">
+          <button class="icon-btn" onclick="toggleEmojiPicker(event)" title="Emoji" style="width:46px;height:46px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </button>
+          <div class="emoji-popup" id="emoji-picker"></div>
+        </div>
+        <div style="position:relative;">
+          <button class="attach-btn" onclick="toggleAttachMenu(event)" title="Attach">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <div class="attach-menu" id="attach-menu">
+            <div class="am-item" onclick="triggerImageUpload()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Photo / Image
+            </div>
+            <div class="am-item" onclick="triggerFileUpload()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              Document / File
+            </div>
+          </div>
+        </div>
+        <textarea id="msg-input" rows="1" placeholder="Type a message…" onkeydown="msgKeydown(event)" oninput="autoResize(this);sendTyping()"></textarea>
+        <button class="send-btn" onclick="sendMessage()" title="Send">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+      <input type="file" id="file-input" accept="*/*" onchange="handleFileUpload(this)">
+      <input type="file" id="img-input" accept="image/*" onchange="handleImageUpload(this)">
+    </div>
+  </div>
+</div>
+
+<!-- Context menu -->
+<div class="ctx-menu" id="ctx-menu"></div>
+<!-- Reaction picker -->
+<div class="reaction-picker" id="reaction-picker"></div>
+<!-- Media viewer -->
+<div id="media-viewer" onclick="closeMediaViewer()">
+  <button class="mv-close" onclick="closeMediaViewer()">✕</button>
+  <img id="media-img" src="" alt="Media">
+</div>
+<!-- Toast -->
+<div id="toast"><span class="t-icon">✓</span><span class="t-text" id="toast-text"></span></div>
+<!-- Chat menu -->
+<div class="ctx-menu" id="chat-ctx-menu"></div>
+
+<!-- Profile page -->
+<div class="page-overlay" id="profile-overlay">
+  <div class="page-card">
+    <div class="page-hdr"><h2>My Profile</h2><button class="close-btn" onclick="closeProfile()">✕</button></div>
+    <div class="page-body">
+      <div class="profile-pic-wrap">
+        <div class="profile-pic" id="profile-pic-display" onclick="triggerProfilePicUpload()">
+          <div class="pic-overlay">📷</div>
+        </div>
+        <input type="file" id="profile-pic-input" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
+        <div style="font-size:13px;color:var(--text-muted)">Tap to change photo</div>
+      </div>
+      <div class="field"><label>Display Name</label><input type="text" id="edit-name" maxlength="30"/></div>
+      <div class="field"><label>Phone Number</label><input type="tel" id="edit-phone" maxlength="20"/></div>
+      <div class="field"><label>About / Bio</label><input type="text" id="edit-bio" maxlength="80"/></div>
+      <div class="field"><label>Email</label><input type="email" id="edit-email" disabled style="opacity:0.6;cursor:not-allowed"/></div>
+      <button class="btn-primary" onclick="saveProfile()" style="margin-top:8px">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings page -->
+<div class="page-overlay" id="settings-overlay">
+  <div class="page-card">
+    <div class="page-hdr"><h2>Settings</h2><button class="close-btn" onclick="closeSettings()">✕</button></div>
+    <div class="page-body">
+      <div class="setting-group">
+        <div class="setting-group-label">Appearance</div>
+        <div class="setting-item" onclick="toggleDarkMode()">
+          <div class="si-icon">🌙</div>
+          <div class="si-body"><div class="si-label">Dark Mode</div><div class="si-desc">Switch to dark theme</div></div>
+          <button class="toggle-switch" id="dark-toggle" onclick="event.stopPropagation();toggleDarkMode()"></button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div class="setting-group-label">Privacy</div>
+        <div class="setting-item" onclick="togglePrivacy('hideOnline')">
+          <div class="si-icon">👁️</div>
+          <div class="si-body"><div class="si-label">Hide Online Status</div><div class="si-desc">Others won't see when you're online</div></div>
+          <button class="toggle-switch" id="toggle-hideOnline" onclick="event.stopPropagation();togglePrivacy('hideOnline')"></button>
+        </div>
+        <div class="setting-item" onclick="togglePrivacy('hideLastSeen')">
+          <div class="si-icon">🕐</div>
+          <div class="si-body"><div class="si-label">Hide Last Seen</div><div class="si-desc">Others won't see your last seen time</div></div>
+          <button class="toggle-switch" id="toggle-hideLastSeen" onclick="event.stopPropagation();togglePrivacy('hideLastSeen')"></button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div class="setting-group-label">Notifications</div>
+        <div class="setting-item">
+          <div class="si-icon">🔔</div>
+          <div class="si-body"><div class="si-label">Push Notifications</div><div class="si-desc" id="notif-permission-text">Enable browser notifications</div></div>
+          <button class="toggle-switch" id="toggle-notif" onclick="event.stopPropagation();requestNotifPermission()"></button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div class="setting-group-label">Account</div>
+        <div class="setting-item" onclick="clearCurrentChat()">
+          <div class="si-icon">🗑️</div>
+          <div class="si-body"><div class="si-label">Clear Current Chat</div><div class="si-desc">Remove all messages (only for you)</div></div>
+          <div class="si-right">›</div>
+        </div>
+        <div class="setting-item" onclick="logout()">
+          <div class="si-icon">🚪</div>
+          <div class="si-body"><div class="si-label">Logout</div><div class="si-desc">Sign out of your account</div></div>
+          <div class="si-right">›</div>
+        </div>
+        <div class="danger-zone">
+          <div class="setting-item" onclick="deleteAccount()">
+            <div class="si-icon">⚠️</div>
+            <div class="si-body"><div class="si-label">Delete Account</div><div class="si-desc" style="color:var(--danger)">Permanently delete your account</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div id="confirm-dialog">
+  <div class="confirm-card">
+    <h3 id="confirm-title"></h3>
+    <p id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forward modal -->
+<div id="forward-modal">
+  <div class="fw-card">
+    <div class="fw-hdr"><h3>Forward to…</h3></div>
+    <div class="fw-list" id="fw-list"></div>
+    <div class="fw-footer"><button style="width:100%;padding:12px;border-radius:11px;border:2px solid var(--border);background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="closeForward()">Cancel</button></div>
+  </div>
+</div>
+
+<!-- Chat profile overlay -->
+<div class="page-overlay" id="chat-profile-overlay">
+  <div class="page-card">
+    <div class="page-hdr"><h2>Contact Info</h2><button class="close-btn" onclick="closeChatProfile()">✕</button></div>
+    <div class="page-body">
+      <div class="profile-pic-wrap">
+        <div class="profile-pic" id="chat-profile-pic" style="pointer-events:none;cursor:default;"></div>
+        <div style="font-size:18px;font-weight:800;" id="chat-profile-name"></div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;" id="chat-profile-bio"></div>
+        <div style="font-size:13px;color:var(--primary);font-weight:600;margin-top:2px;" id="chat-profile-phone"></div>
+      </div>
+      <div class="setting-group">
+        <div class="setting-group-label">Actions</div>
+        <div class="setting-item" onclick="toggleBlock()">
+          <div class="si-icon">🚫</div>
+          <div class="si-body"><div class="si-label" id="block-btn-label">Block User</div><div class="si-desc">Block messages from this contact</div></div>
+        </div>
+        <div class="setting-item" onclick="muteCurrent()">
+          <div class="si-icon">🔇</div>
+          <div class="si-body"><div class="si-label" id="mute-btn-label">Mute Notifications</div><div class="si-desc">Silence notifications for this chat</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE & APP LOGIC -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
